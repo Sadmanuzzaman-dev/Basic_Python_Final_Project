@@ -1,72 +1,75 @@
-#import json
+class Product:
+    def __init__(self, name, price, quantity):
+        self.name = name
+        self.price = price
+        self.quantity = quantity
 
+inventory = {}
 
-class Inventory:
-    def __init__(self):
-        self.inventory = {}
-        # with open("data.txt", "r") as file:
-        #     self.inventory = json.load(file)
+def add_product():
+    global inventory
+    name = input("Enter product name: ")
+    price = float(input("Enter product price: "))
+    quantity = int(input("Enter initial quantity: "))
+    inventory[name] = {'price': price, 'quantity': quantity}
+    print(f"{name} added to inventory.")
 
-    def add_item(self, item_name, stock_count, price):
-        self.inventory[item_name] = {"stock_count": stock_count, "price": price}
-        # with open("data.txt", "w") as file:
-        #     json.dump(self.inventory, file)
+def update_product():
+    global inventory
+    product_name = input("Enter product name: ")
+    action = input("Enter action (buy/sell/delete): ").lower()
+    amount = int(input("Enter amount: "))
 
-    def update_item(self, item_name, stock_count, price):
-        if item_name in self.inventory:
-            self.inventory[item_name]["stock_count"] = stock_count
-            self.inventory[item_name]["price"] = price
-        else:
-            print("Item not found in inventory.")
+    if product_name in inventory:
+        if action == "buy":
+            inventory[product_name]["quantity"] += amount
+        elif action == "sell":
+            if inventory[product_name]["quantity"] >= amount:
+                inventory[product_name]["quantity"] -= amount
+            else:
+                print(f"Not enough stock of {product_name} to sell.")
+        elif action == "delete":
+            del inventory[product_name]
+            print(f"{product_name} deleted from inventory.")
+    else:
+        print(f"{product_name} not found in inventory.")
 
-    def check_item_details(self, item_name):
-        if item_name in self.inventory:
-            item = self.inventory[item_name]
-            return f"Product Name: {item_name}, Stock Count: {item['stock_count']}, Price: {item['price']}"
-        else:
-            return "Item not found in inventory."
+def print_inventory():
+    if not inventory:
+        print("Inventory is empty.")
+    else:
+        print("Current Inventory:")
+        for product_name, product_details in inventory.items():
+            print(f"{product_name}: Price: {product_details['price']}, Quantity: {product_details['quantity']}")
 
-    def remove_item(self, item_name):
-        if item_name in self.inventory:
-            del self.inventory[item_name]
+def save_inventory():
+    try:
+        with open("inventory.txt", "w") as f:
+            for product_name, product_details in inventory.items():
+                f.write(f"{product_name},{product_details['price']},{product_details['quantity']}\n")
+        print("Inventory saved to file.")
+    except Exception as e:
+        print(f"Error saving inventory: {e}")
 
-        else:
-            print("Item not found in inventory.")
+while True:
+    print("\nInventory Management System")
+    print("1. Add Product")
+    print("2. Update Product (Buy/Sell/Delete)")
+    print("3. View Inventory")
+    print("4. Save Inventory")
+    print("5. Exit")
+    choice = input("Enter your choice (1-5): ")
 
-
-def main():
-    inventory = Inventory()
-    Run = True
-
-    while Run:
-        print(" Write 1 to Add item")
-        print(" Write 2 to Update item")
-        print(" Write 3 to Check item details")
-        print(" Write 4 to Remove item")
-        choice = int(input("What you want to do?: "))
-
-        if choice == 1:
-            product_name = input("Product Name: ")
-            product_stock = input("Product Stock: ")
-            product_price = input("Product Price: ")
-            inventory.add_item(product_name, product_stock, product_price)
-
-        elif choice == 2:
-            product_name = input("Product Name: ")
-            product_stock = input("Product Stock: ")
-            product_price = input("Product Price: ")
-            inventory.update_item(product_name, product_stock, product_price)
-
-        elif choice == 3:
-            product_name = input("Product Name: ")
-            print(inventory.check_item_details(product_name))
-
-        elif choice == 4:
-            product_name = input("Product Name: ")
-            inventory.remove_item(product_name)
-
-        else:
-            Run = False
-
-
-main()
+    if choice == '1':
+        add_product()
+    elif choice == '2':
+        update_product()
+    elif choice == '3':
+        print_inventory()
+    elif choice == '4':
+        save_inventory()
+    elif choice == '5':
+        print("Exiting...")
+        break
+    else:
+        print("Invalid choice. Please enter a number between 1 and 5.")
